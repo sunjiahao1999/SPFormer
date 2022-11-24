@@ -7,3 +7,4 @@ plyfile
 tensorboardX
 tensorboard
 gorilla-core
+opencv-python
