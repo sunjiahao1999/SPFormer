@@ -1,0 +1,14 @@
+__pycache__
+.vscode
+*.so
+build
+*.egg-info
+
+checkpoints
+
+data/scannetv2/train
+data/scannetv2/val
+data/scannetv2/val_gt
+data/scannetv2/test
+
+exps

@@ -1,0 +1,108 @@
+train:
+  seed: 1999
+  epochs: 512
+  interval: 16 # save & eval interval
+  pretrain: checkpoints/epoch_00512.pth
+
+test:
+  seed: 1999
+  test_topk_per_scene: 100
+  test_score_thresh: 0.0
+  test_npoint_thresh: 100
+
+dataloader:
+  train:
+    batch_size: 4
+    num_workers: 8
+    persistent_workers: True
+  val:
+    batch_size: 1
+    num_workers: 4
+    persistent_workers: True
+  test:
+    batch_size: 1
+    num_workers: 4
+    persistent_workers: True
+
+data:
+  train:
+    type: scannetv2
+    data_root: data/scannetv2
+    prefix: train
+    suffix: _inst_nostuff.pth
+    training: True
+    mode: 4
+    with_elastic: True
+    use_xyz: True
+    voxel_cfg:
+      scale: 50
+      spatial_shape: [128, 512]
+      max_npoint: 250000
+  val:
+    type: scannetv2
+    data_root: data/scannetv2
+    prefix: val
+    suffix: _inst_nostuff.pth
+    training: False
+    mode: 4
+    with_elastic: False
+    use_xyz: True
+    voxel_cfg:
+      scale: 50
+      spatial_shape: [128, 512]
+      max_npoint: 250000
+  test:
+    type: scannetv2
+    data_root: data/scannetv2
+    prefix: val
+    suffix: _inst_nostuff.pth
+    training: False
+    mode: 4
+    with_elastic: False
+    use_xyz: True
+    voxel_cfg:
+      scale: 50
+      spatial_shape: [128, 512]
+      max_npoint: 250000
+
+model:
+  input_channel: 6
+  blocks: 5
+  block_reps: 2
+  media: 32
+  normalize_before: True
+  return_blocks: True
+  pool: mean
+  num_class: 18
+  decoder:
+    num_layer: 6
+    num_query: 400
+    d_model: 256
+    nhead: 8
+    hidden_dim: 1024
+    dropout: 0.0
+    activation_fn: gelu
+    iter_pred: True
+    attn_mask: True
+    pe: False
+  criterion:
+    loss_weight: [0.5, 1.0, 1.0, 0.5]
+    cost_weight: [0.5, 1.0, 1.0]
+    non_object_weight: 0.1
+  test_cfg:
+    topk_insts: 100
+    score_thr: 0.0
+    npoint_thr: 100
+  norm_eval: False
+  fix_module: []
+
+optimizer:
+  type: AdamW
+  lr: 0.0001
+  weight_decay: 0.05
+
+lr_scheduler:
+  type: PolyLR
+  max_iters: 512
+  power: 0.9
+  constant_ending: 0.0
