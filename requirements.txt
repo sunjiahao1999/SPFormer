@@ -6,3 +6,4 @@ numba
 plyfile
 tensorboardX
 tensorboard
+gorilla-core
