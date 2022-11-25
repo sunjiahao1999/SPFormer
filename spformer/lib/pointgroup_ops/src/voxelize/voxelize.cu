@@ -51,6 +51,3 @@ template <typename T>
 void voxelize_bp_cuda(Int nOutputRows, Int maxActive, Int nPlanes, T *d_output_feats, T *d_feats, Int *rules, bool average){
     voxelize_bp_cuda_<T><<<std::min(nOutputRows, (Int)32768), std::min(nPlanes, (Int)32)>>>(nOutputRows, maxActive, nPlanes, d_output_feats, d_feats, rules, average);
 }
-
-
-

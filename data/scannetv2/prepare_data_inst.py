@@ -5,36 +5,32 @@ import argparse
 import glob
 import json
 import multiprocessing as mp
-
 import numpy as np
+import open3d as o3d
 import plyfile
 import scannet_util
-import torch
-import open3d as o3d
 import segmentator
+import torch
 
 # Map relevant classes to {0,1,...,19}, and ignored classes to -100
 remapper = np.ones(150) * (-100)
-for i, x in enumerate(
-    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 24, 28, 33, 34, 36, 39]):
+for i, x in enumerate([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 24, 28, 33, 34, 36, 39]):
     remapper[x] = i
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--data_split",
-                    help="data split (train / val / test)",
-                    default="train")
+parser.add_argument('--data_split', help='data split (train / val / test)', default='train')
 opt = parser.parse_args()
 
 split = opt.data_split
-print("data split: {}".format(split))
-files = sorted(glob.glob(split + "/*_vh_clean_2.ply"))
-if opt.data_split != "test":
-    files2 = sorted(glob.glob(split + "/*_vh_clean_2.labels.ply"))
-    files3 = sorted(glob.glob(split + "/*_vh_clean_2.0.010000.segs.json"))
-    files4 = sorted(glob.glob(split + "/*[0-9].aggregation.json"))
+print('data split: {}'.format(split))
+files = sorted(glob.glob(split + '/*_vh_clean_2.ply'))
+if opt.data_split != 'test':
+    files2 = sorted(glob.glob(split + '/*_vh_clean_2.labels.ply'))
+    files3 = sorted(glob.glob(split + '/*_vh_clean_2.0.010000.segs.json'))
+    files4 = sorted(glob.glob(split + '/*[0-9].aggregation.json'))
     assert len(files) == len(files2)
     assert len(files) == len(files3)
-    assert len(files) == len(files4), "{} {}".format(len(files), len(files4))
+    assert len(files) == len(files4), '{} {}'.format(len(files), len(files4))
 
 
 def f_test(fn):
@@ -50,14 +46,14 @@ def f_test(fn):
     faces = torch.from_numpy(np.array(mesh.triangles).astype(np.int64))
     superpoint = segmentator.segment_mesh(vertices, faces).numpy()
 
-    torch.save((coords, colors, superpoint), fn[:-15] + "_inst_nostuff.pth")
-    print("Saving to " + fn[:-15] + "_inst_nostuff.pth")
+    torch.save((coords, colors, superpoint), fn[:-15] + '_inst_nostuff.pth')
+    print('Saving to ' + fn[:-15] + '_inst_nostuff.pth')
 
 
 def f(fn):
-    fn2 = fn[:-3] + "labels.ply"
-    fn3 = fn[:-15] + "_vh_clean_2.0.010000.segs.json"
-    fn4 = fn[:-15] + ".aggregation.json"
+    fn2 = fn[:-3] + 'labels.ply'
+    fn3 = fn[:-15] + '_vh_clean_2.0.010000.segs.json'
+    fn4 = fn[:-15] + '.aggregation.json'
     print(fn)
 
     f = plyfile.PlyData().read(fn)
@@ -66,11 +62,11 @@ def f(fn):
     colors = np.ascontiguousarray(points[:, 3:6]) / 127.5 - 1
 
     f2 = plyfile.PlyData().read(fn2)
-    sem_labels = remapper[np.array(f2.elements[0]["label"])]
+    sem_labels = remapper[np.array(f2.elements[0]['label'])]
 
     with open(fn3) as jsondata:
         d = json.load(jsondata)
-        seg = d["segIndices"]
+        seg = d['segIndices']
     segid_to_pointid = {}
     for i in range(len(seg)):
         if seg[i] not in segid_to_pointid:
@@ -81,14 +77,13 @@ def f(fn):
     labels = []
     with open(fn4) as jsondata:
         d = json.load(jsondata)
-        for x in d["segGroups"]:
-            if (scannet_util.g_raw2scannetv2[x["label"]] != "wall"
-                    and scannet_util.g_raw2scannetv2[x["label"]] != "floor"):
-                instance_segids.append(x["segments"])
-                labels.append(x["label"])
-                assert x["label"] in scannet_util.g_raw2scannetv2.keys()
-    if fn == "val/scene0217_00_vh_clean_2.ply" and instance_segids[
-            0] == instance_segids[int(len(instance_segids) / 2)]:
+        for x in d['segGroups']:
+            if (scannet_util.g_raw2scannetv2[x['label']] != 'wall'
+                    and scannet_util.g_raw2scannetv2[x['label']] != 'floor'):
+                instance_segids.append(x['segments'])
+                labels.append(x['label'])
+                assert x['label'] in scannet_util.g_raw2scannetv2.keys()
+    if fn == 'val/scene0217_00_vh_clean_2.ply' and instance_segids[0] == instance_segids[int(len(instance_segids) / 2)]:
         instance_segids = instance_segids[:int(len(instance_segids) / 2)]
     check = []
     for i in range(len(instance_segids)):
@@ -109,16 +104,15 @@ def f(fn):
     faces = torch.from_numpy(np.array(mesh.triangles).astype(np.int64))
     superpoint = segmentator.segment_mesh(vertices, faces).numpy()
 
-    torch.save((coords, colors, superpoint, sem_labels, instance_labels),
-               fn[:-15] + "_inst_nostuff.pth")
-    print("Saving to " + fn[:-15] + "_inst_nostuff.pth")
+    torch.save((coords, colors, superpoint, sem_labels, instance_labels), fn[:-15] + '_inst_nostuff.pth')
+    print('Saving to ' + fn[:-15] + '_inst_nostuff.pth')
 
 
 # for fn in files:
 #     f(fn)
 
 p = mp.Pool(processes=mp.cpu_count())
-if opt.data_split == "test":
+if opt.data_split == 'test':
     p.map(f_test, files)
 else:
     p.map(f, files)

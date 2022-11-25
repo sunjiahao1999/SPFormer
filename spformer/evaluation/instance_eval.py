@@ -2,9 +2,8 @@
 # Modified by Thang Vu
 
 import multiprocessing as mp
-from copy import deepcopy
-
 import numpy as np
+from copy import deepcopy
 
 from ..utils import rle_decode
 from .instance_eval_util import get_instances
@@ -45,8 +44,8 @@ class ScanNetEval(object):
         # results: class x iou
         ap = np.zeros((len(dist_threshes), len(self.eval_class_labels), len(ious)), np.float)
         rc = np.zeros((len(dist_threshes), len(self.eval_class_labels), len(ious)), np.float)
-        for di, (min_region_size, distance_thresh, distance_conf) in enumerate(zip(min_region_sizes, dist_threshes,
-                                                                                   dist_confs)):
+        for di, (min_region_size, distance_thresh,
+                 distance_conf) in enumerate(zip(min_region_sizes, dist_threshes, dist_confs)):
             for oi, iou_th in enumerate(ious):
                 pred_visited = {}
                 for m in matches:
@@ -66,7 +65,8 @@ class ScanNetEval(object):
                         gt_instances = matches[m]['gt'][label_name]
                         # filter groups in ground truth
                         gt_instances = [
-                            gt for gt in gt_instances if gt['instance_id'] >= 1000 and gt['vert_count'] >= min_region_size
+                            gt for gt in gt_instances
+                            if gt['instance_id'] >= 1000 and gt['vert_count'] >= min_region_size
                             and gt['med_dist'] <= distance_thresh and gt['dist_conf'] >= distance_conf
                         ]
                         if gt_instances:

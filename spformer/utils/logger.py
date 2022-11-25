@@ -1,5 +1,6 @@
 import logging
 
+
 def get_root_logger(log_file=None, log_level=logging.INFO):
     logger = logging.getLogger('spformer')
     # if the logger has been initialized, just return it
@@ -14,5 +15,3 @@ def get_root_logger(log_file=None, log_level=logging.INFO):
         logger.addHandler(file_handler)
 
     return logger
-
-

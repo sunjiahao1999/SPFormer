@@ -1,12 +1,9 @@
-from cmath import cos
-import enum
-from typing import List
+import gorilla
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from scipy.optimize import linear_sum_assignment
-import gorilla
 import torch_scatter
+from scipy.optimize import linear_sum_assignment
 from typing import Optional
 
 
@@ -30,15 +27,14 @@ def batch_sigmoid_focal_loss(inputs, targets, alpha: float = 0.25, gamma: float 
     N = inputs.shape[1]
 
     prob = inputs.sigmoid()
-    focal_pos = ((1 - prob) ** gamma) * F.binary_cross_entropy_with_logits(
-        inputs, torch.ones_like(inputs), reduction="none"
-    )
-    focal_neg = (prob ** gamma) * F.binary_cross_entropy_with_logits(inputs, torch.zeros_like(inputs), reduction="none")
+    focal_pos = ((1 - prob)**gamma) * F.binary_cross_entropy_with_logits(
+        inputs, torch.ones_like(inputs), reduction='none')
+    focal_neg = (prob**gamma) * F.binary_cross_entropy_with_logits(inputs, torch.zeros_like(inputs), reduction='none')
     if alpha >= 0:
         focal_pos = focal_pos * alpha
         focal_neg = focal_neg * (1 - alpha)
 
-    loss = torch.einsum("nc,mc->nm", focal_pos, targets) + torch.einsum("nc,mc->nm", focal_neg, (1 - targets))
+    loss = torch.einsum('nc,mc->nm', focal_pos, targets) + torch.einsum('nc,mc->nm', focal_neg, (1 - targets))
 
     return loss / N
 
@@ -54,10 +50,10 @@ def batch_sigmoid_bce_loss(inputs: torch.Tensor, targets: torch.Tensor):
     """
     N = inputs.shape[1]
 
-    pos = F.binary_cross_entropy_with_logits(inputs, torch.ones_like(inputs), reduction="none")
-    neg = F.binary_cross_entropy_with_logits(inputs, torch.zeros_like(inputs), reduction="none")
+    pos = F.binary_cross_entropy_with_logits(inputs, torch.ones_like(inputs), reduction='none')
+    neg = F.binary_cross_entropy_with_logits(inputs, torch.zeros_like(inputs), reduction='none')
 
-    loss = torch.einsum("nc,mc->nm", pos, targets) + torch.einsum("nc,mc->nm", neg, (1 - targets))
+    loss = torch.einsum('nc,mc->nm', pos, targets) + torch.einsum('nc,mc->nm', neg, (1 - targets))
 
     return loss / N
 
@@ -74,7 +70,7 @@ def batch_dice_loss(inputs: torch.Tensor, targets: torch.Tensor):
                 (0 for the negative class and 1 for the positive class).
     """
     inputs = inputs.sigmoid()
-    numerator = 2 * torch.einsum("nc,mc->nm", inputs, targets)
+    numerator = 2 * torch.einsum('nc,mc->nm', inputs, targets)
     denominator = inputs.sum(-1)[:, None] + targets.sum(-1)[None, :]
     loss = 1 - (numerator + 1) / (denominator + 1)  # 为什么这里是+1？
     return loss
@@ -109,9 +105,9 @@ def sigmoid_focal_loss(inputs, targets, alpha: float = 0.25, gamma: float = 2):
         Loss tensor
     """
     prob = inputs.sigmoid()
-    ce_loss = F.binary_cross_entropy_with_logits(inputs, targets, reduction="none")
+    ce_loss = F.binary_cross_entropy_with_logits(inputs, targets, reduction='none')
     p_t = prob * targets + (1 - prob) * (1 - targets)
-    loss = ce_loss * ((1 - p_t) ** gamma)
+    loss = ce_loss * ((1 - p_t)**gamma)
 
     if alpha >= 0:
         alpha_t = alpha * targets + (1 - alpha) * (1 - targets)
@@ -142,24 +138,24 @@ def dice_loss(
 
 
 @torch.jit.script
-def dice_loss_multi_calsses(
-    input: torch.Tensor, target: torch.Tensor, epsilon: float = 1e-5, weight: Optional[float] = None
-) -> torch.Tensor:
+def dice_loss_multi_calsses(input: torch.Tensor,
+                            target: torch.Tensor,
+                            epsilon: float = 1e-5,
+                            weight: Optional[float] = None) -> torch.Tensor:
     r"""
-    modify compute_per_channel_dice from https://github.com/wolny/pytorch-3dunet/blob/6e5a24b6438f8c631289c10638a17dea14d42051/unet3d/losses.py
+    modify compute_per_channel_dice from
+    https://github.com/wolny/pytorch-3dunet/blob/6e5a24b6438f8c631289c10638a17dea14d42051/unet3d/losses.py
     """
     assert input.size() == target.size(), "'input' and 'target' must have the same shape"
 
     # convert the feature channel(category channel) as first
-    # axis_order = (1, 0) + tuple(range(2, input.dim()))
     input = input.permute(1, 0)
     target = target.permute(1, 0)
 
     target = target.float()
     # Compute per channel Dice Coefficient
     per_channel_dice = (2 * torch.sum(input * target, dim=1) + epsilon) / (
-        torch.sum(input * input, dim=1) + torch.sum(target * target, dim=1) + 1e-4 + epsilon
-    )
+        torch.sum(input * input, dim=1) + torch.sum(target * target, dim=1) + 1e-4 + epsilon)
 
     loss = 1.0 - per_channel_dice
 
@@ -206,11 +202,7 @@ class HungarianMatcher(nn.Module):
             cost_mask = batch_sigmoid_bce_loss(pred_mask, tgt_mask.float())
             cost_dice = batch_dice_loss(pred_mask, tgt_mask.float())
 
-            C = (
-                self.cost_weight[0] * cost_class
-                + self.cost_weight[1] * cost_mask
-                + self.cost_weight[2] * cost_dice
-            )
+            C = (self.cost_weight[0] * cost_class + self.cost_weight[1] * cost_mask + self.cost_weight[2] * cost_dice)
             C = C.cpu()
             indices.append(linear_sum_assignment(C))
         return [(torch.as_tensor(i, dtype=torch.int64), torch.as_tensor(j, dtype=torch.int64)) for i, j in indices]
@@ -218,6 +210,7 @@ class HungarianMatcher(nn.Module):
 
 @gorilla.LOSSES.register_module()
 class Criterion(nn.Module):
+
     def __init__(
         self,
         ignore_label=-100,
@@ -278,7 +271,6 @@ class Criterion(nn.Module):
         # mask loss
         mask_bce_loss = torch.tensor([0.0], device=pred_labels.device)
         mask_dice_loss = torch.tensor([0.0], device=pred_labels.device)
-        # mask_focal_loss = torch.tensor([0.0], device=pred_labels.device)
         for mask, score, inst, (idx_q, idx_gt) in zip(pred_masks, pred_scores, insts, indices):
             if len(inst) == 0:
                 continue
@@ -295,44 +287,27 @@ class Criterion(nn.Module):
                 score_loss += F.mse_loss(pred_score, tgt_score)
             mask_bce_loss += F.binary_cross_entropy_with_logits(pred_mask, tgt_mask.float())
             mask_dice_loss += dice_loss(pred_mask, tgt_mask.float())
-            # mask_focal_loss += sigmoid_focal_loss(pred_mask, tgt_mask.float())
         score_loss = score_loss / len(pred_masks)
         mask_bce_loss = mask_bce_loss / len(pred_masks)
         mask_dice_loss = mask_dice_loss / len(pred_masks)
-        # mask_focal_loss = mask_focal_loss / len(pred_masks)
 
         loss_out['score_loss'] = score_loss.item()
         loss_out['mask_bce_loss'] = mask_bce_loss.item()
         loss_out['mask_dice_loss'] = mask_dice_loss.item()
-        # loss_out['mask_focal_loss'] = mask_focal_loss.item()
 
         loss = (
-            self.loss_weight[0] * class_loss
-            + self.loss_weight[1] * mask_bce_loss
-            + self.loss_weight[2] * mask_dice_loss
-            + self.loss_weight[3] * score_loss
-            # + self.loss_weight[4] * mask_focal_loss
-        )
+            self.loss_weight[0] * class_loss + self.loss_weight[1] * mask_bce_loss +
+            self.loss_weight[2] * mask_dice_loss + self.loss_weight[3] * score_loss)
 
-        loss_out = {f"layer_{layer}_" + k: v for k, v in loss_out.items()}
+        loss_out = {f'layer_{layer}_' + k: v for k, v in loss_out.items()}
         return loss, loss_out
 
     def forward(self, pred, insts):
         '''
-        pred_masks: List[Tensor (n, M)] len(p2c) == B
+        pred_masks: List[Tensor (n, M)]
         pred_labels: (B, n, 19)
         pred_scores: (B, n, 1) or [(B, n, 1)]
-        pred_cls: (B, n, 19)
-        pred_sem: (B*N, 20)
-        cluster_coords: (B, n, 3)
-        point_offsets: (B*N, 3)
-        sem: (B*N, )
         insts: List[Instance3D]
-
-        coords: (B*N, 3)
-        batched_gt_instance: List of Dicts
-        instance_info: (B*N, 9), float32 tensor (meanxyz, minxyz, maxxyz)
-        instance_labels: (B*N), long
         '''
         loss_out = {}
 
@@ -341,7 +316,6 @@ class Criterion(nn.Module):
         pred_masks = pred['masks']
 
         # match
-        # List of Tuple,len is B, (idx of query, idx of gt)
         indices = self.matcher(pred_labels, pred_masks, insts)
         idx = self._get_src_permutation_idx(indices)
 
@@ -380,27 +354,19 @@ class Criterion(nn.Module):
                 score_loss += F.mse_loss(pred_score, tgt_score)
             mask_bce_loss += F.binary_cross_entropy_with_logits(pred_mask, tgt_mask.float())
             mask_dice_loss += dice_loss(pred_mask, tgt_mask.float())
-            # mask_focal_loss += sigmoid_focal_loss(pred_mask, tgt_mask.float())
         score_loss = score_loss / len(pred_masks)
         mask_bce_loss = mask_bce_loss / len(pred_masks)
-        # mask_dice_loss = mask_dice_loss / len(pred_masks)
 
         loss_out['score_loss'] = score_loss.item()
         loss_out['mask_bce_loss'] = mask_bce_loss.item()
         loss_out['mask_dice_loss'] = mask_dice_loss.item()
 
         loss = (
-            self.loss_weight[0] * class_loss
-            + self.loss_weight[1] * mask_bce_loss
-            + self.loss_weight[2] * mask_dice_loss
-            + self.loss_weight[3] * score_loss
-            # + self.loss_weight[4] * mask_focal_loss
-            # + self.loss_weight[3] * semantic_loss
-            # + self.loss_weight[4] * offset_loss
-        )
+            self.loss_weight[0] * class_loss + self.loss_weight[1] * mask_bce_loss +
+            self.loss_weight[2] * mask_dice_loss + self.loss_weight[3] * score_loss)
 
-        if "aux_outputs" in pred:
-            for i, aux_outputs in enumerate(pred["aux_outputs"]):
+        if 'aux_outputs' in pred:
+            for i, aux_outputs in enumerate(pred['aux_outputs']):
                 loss_i, loss_out_i = self.get_layer_loss(i, aux_outputs, insts)
                 loss += loss_i
                 loss_out.update(loss_out_i)

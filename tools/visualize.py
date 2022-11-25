@@ -1,8 +1,7 @@
 import argparse
+import numpy as np
 import os
 import os.path as osp
-
-import numpy as np
 import torch
 
 # yapf:disable
@@ -167,8 +166,8 @@ def write_ply(verts, colors, indices, output_file):
     file.write('property list uchar uint vertex_indices\n')
     file.write('end_header\n')
     for vert, color in zip(verts, colors):
-        file.write('{:f} {:f} {:f} {:d} {:d} {:d}\n'.format(vert[0], vert[1], vert[2], int(color[0] * 255), int(color[1] * 255),
-                                                            int(color[2] * 255)))
+        file.write('{:f} {:f} {:f} {:d} {:d} {:d}\n'.format(vert[0], vert[1], vert[2], int(color[0] * 255),
+                                                            int(color[1] * 255), int(color[2] * 255)))
     for ind in indices:
         file.write('3 {:d} {:d} {:d}\n'.format(ind[0], ind[1], ind[2]))
     file.close()

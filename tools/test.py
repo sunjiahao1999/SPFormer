@@ -1,15 +1,12 @@
 import argparse
-import os.path as osp
-
 import gorilla
 import torch
-import numpy as np
+from tqdm import tqdm
 
 from spformer.dataset import build_dataloader, build_dataset
 from spformer.evaluation import ScanNetEval
 from spformer.model import SPFormer
 from spformer.utils import get_root_logger, save_gt_instances, save_pred_instances
-from tqdm import tqdm
 
 
 def get_args():
@@ -40,7 +37,7 @@ def main():
     with torch.no_grad():
         model.eval()
         for batch in dataloader:
-            result = model(batch, mode="predict")
+            result = model(batch, mode='predict')
             results.append(result)
             progress_bar.update()
         progress_bar.close()
@@ -50,7 +47,7 @@ def main():
         pred_insts.append(res['pred_instances'])
         gt_insts.append(res['gt_instances'])
 
-    if not cfg.data.test.prefix == "test":
+    if not cfg.data.test.prefix == 'test':
         logger.info('Evaluate instance segmentation')
         scannet_eval = ScanNetEval(dataset.CLASSES)
         scannet_eval.evaluate(pred_insts, gt_insts)
@@ -60,7 +57,7 @@ def main():
         logger.info('Save results')
         nyu_id = dataset.NYU_ID
         save_pred_instances(args.out, 'pred_instance', scan_ids, pred_insts, nyu_id)
-        if not cfg.data.test.prefix == "test":
+        if not cfg.data.test.prefix == 'test':
             save_gt_instances(args.out, 'gt_instance', scan_ids, gt_insts, nyu_id)
 
 

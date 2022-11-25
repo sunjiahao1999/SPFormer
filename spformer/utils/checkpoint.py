@@ -1,8 +1,8 @@
 import multiprocessing as mp
+import numpy as np
 import os
 import os.path as osp
 
-import numpy as np
 from .mask_encoder import rle_decode
 
 

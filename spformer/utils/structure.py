@@ -1,8 +1,6 @@
-from typing import Any, Dict, List, Tuple, Union
 import torch
-import itertools
-import numpy as np
 from numpy import ndarray
+from typing import Any, Dict, Union
 
 
 class Instances3D:
@@ -55,7 +53,7 @@ class Instances3D:
             int
         """
         return self._num_points
-    
+
     @property
     def gt_instances(self) -> ndarray:
         """
@@ -65,13 +63,13 @@ class Instances3D:
         return self._gt_instances
 
     def __setattr__(self, name: str, val: Any) -> None:
-        if name.startswith("_"):
+        if name.startswith('_'):
             super().__setattr__(name, val)
         else:
             self.set(name, val)
 
     def __getattr__(self, name: str) -> Any:
-        if name == "_fields" or name not in self._fields:
+        if name == '_fields' or name not in self._fields:
             raise AttributeError("Cannot find field '{}' in the given Instances!".format(name))
         return self._fields[name]
 
@@ -83,9 +81,8 @@ class Instances3D:
         """
         data_len = len(value)
         if len(self._fields):
-            assert (
-                len(self) == data_len
-            ), "Adding a field of length {} to a Instances of length {}".format(data_len, len(self))
+            assert (len(self) == data_len), 'Adding a field of length {} to a Instances of length {}'.format(
+                data_len, len(self))
         self._fields[name] = value
 
     def has(self, name: str) -> bool:
@@ -117,27 +114,27 @@ class Instances3D:
         return self._fields
 
     # Tensor-like methods
-    def to(self, *args: Any, **kwargs: Any) -> "Instances3D":
+    def to(self, *args: Any, **kwargs: Any) -> 'Instances3D':
         """
         Returns:
             Instances: all fields are called with a `to(device)`, if the field has this method.
         """
         ret = Instances3D(self._num_points, self._gt_instances)
         for k, v in self._fields.items():
-            if hasattr(v, "to"):
+            if hasattr(v, 'to'):
                 v = v.to(*args, **kwargs)
             ret.set(k, v)
         return ret
 
-    def cuda(self, *args: Any, **kwargs: Any) -> "Instances3D":
+    def cuda(self, *args: Any, **kwargs: Any) -> 'Instances3D':
         ret = Instances3D(self._num_points, self._gt_instances)
         for k, v in self._fields.items():
-            if hasattr(v, "cuda"):
+            if hasattr(v, 'cuda'):
                 v = v.cuda(*args, **kwargs)
             ret.set(k, v)
         return ret
 
-    def __getitem__(self, item: Union[int, slice, torch.BoolTensor]) -> "Instances3D":
+    def __getitem__(self, item: Union[int, slice, torch.BoolTensor]) -> 'Instances3D':
         """
         Args:
             item: an index-like object and will be used to index all the fields.
@@ -148,7 +145,7 @@ class Instances3D:
         """
         if type(item) == int:
             if item >= len(self) or item < -len(self):
-                raise IndexError("Instances index out of range!")
+                raise IndexError('Instances index out of range!')
             else:
                 item = slice(item, None, len(self))
 
@@ -161,17 +158,16 @@ class Instances3D:
         for v in self._fields.values():
             # use __len__ because len() has to be int and is not friendly to tracing
             return v.__len__()
-        raise NotImplementedError("Empty Instances does not support __len__!")
+        raise NotImplementedError('Empty Instances does not support __len__!')
 
     def __iter__(self):
-        raise NotImplementedError("`Instances` object is not iterable!")
-
+        raise NotImplementedError('`Instances` object is not iterable!')
 
     def __str__(self) -> str:
-        s = self.__class__.__name__ + "("
-        s += "num_instances={}, ".format(len(self))
-        s += "num_points={}, ".format(self._num_points)
-        s += "fields=[{}])".format(", ".join((f"{k}: {v}" for k, v in self._fields.items())))
+        s = self.__class__.__name__ + '('
+        s += 'num_instances={}, '.format(len(self))
+        s += 'num_points={}, '.format(self._num_points)
+        s += 'fields=[{}])'.format(', '.join((f'{k}: {v}' for k, v in self._fields.items())))
         return s
 
     __repr__ = __str__

@@ -1,15 +1,15 @@
 import glob
 import math
-import os.path as osp
-from typing import Dict, List, Sequence, Tuple, Union
-
 import numpy as np
+import os.path as osp
 import pointgroup_ops
 import scipy.interpolate as interpolate
 import scipy.ndimage as ndimage
 import torch
 import torch_scatter
 from torch.utils.data import Dataset
+from typing import Dict, Sequence, Tuple, Union
+
 from ..utils import Instances3D
 
 
@@ -97,7 +97,8 @@ class ScanNetDataset(Dataset):
         if rot:
             theta = np.random.rand() * 2 * math.pi
             m = np.matmul(
-                m, [[math.cos(theta), math.sin(theta), 0], [-math.sin(theta), math.cos(theta), 0], [0, 0, 1]])  # rotation
+                m,
+                [[math.cos(theta), math.sin(theta), 0], [-math.sin(theta), math.cos(theta), 0], [0, 0, 1]])  # rotation
         return np.matmul(xyz, m)
 
     def crop(self, xyz: np.ndarray) -> Union[np.ndarray, np.ndarray]:
@@ -135,18 +136,18 @@ class ScanNetDataset(Dataset):
         Returns:
             xyz: point cloud with elastic distortion
         """
-        blur0 = np.ones((3, 1, 1)).astype("float32") / 3
-        blur1 = np.ones((1, 3, 1)).astype("float32") / 3
-        blur2 = np.ones((1, 1, 3)).astype("float32") / 3
+        blur0 = np.ones((3, 1, 1)).astype('float32') / 3
+        blur1 = np.ones((1, 3, 1)).astype('float32') / 3
+        blur2 = np.ones((1, 1, 3)).astype('float32') / 3
 
         bb = np.abs(xyz).max(0).astype(np.int32) // gran + 3
-        noise = [np.random.randn(bb[0], bb[1], bb[2]).astype("float32") for _ in range(3)]
-        noise = [ndimage.filters.convolve(n, blur0, mode="constant", cval=0) for n in noise]
-        noise = [ndimage.filters.convolve(n, blur1, mode="constant", cval=0) for n in noise]
-        noise = [ndimage.filters.convolve(n, blur2, mode="constant", cval=0) for n in noise]
-        noise = [ndimage.filters.convolve(n, blur0, mode="constant", cval=0) for n in noise]
-        noise = [ndimage.filters.convolve(n, blur1, mode="constant", cval=0) for n in noise]
-        noise = [ndimage.filters.convolve(n, blur2, mode="constant", cval=0) for n in noise]
+        noise = [np.random.randn(bb[0], bb[1], bb[2]).astype('float32') for _ in range(3)]
+        noise = [ndimage.filters.convolve(n, blur0, mode='constant', cval=0) for n in noise]
+        noise = [ndimage.filters.convolve(n, blur1, mode='constant', cval=0) for n in noise]
+        noise = [ndimage.filters.convolve(n, blur2, mode='constant', cval=0) for n in noise]
+        noise = [ndimage.filters.convolve(n, blur0, mode='constant', cval=0) for n in noise]
+        noise = [ndimage.filters.convolve(n, blur1, mode='constant', cval=0) for n in noise]
+        noise = [ndimage.filters.convolve(n, blur2, mode='constant', cval=0) for n in noise]
         ax = [np.linspace(-(b - 1) * gran, (b - 1) * gran, b) for b in bb]
         interp = [interpolate.RegularGridInterpolator(ax, n, bounds_error=0, fill_value=0) for n in noise]
 
@@ -258,13 +259,13 @@ class ScanNetDataset(Dataset):
         voxel_coords, p2v_map, v2p_map = pointgroup_ops.voxelization_idx(coords, len(batch), self.mode)
 
         return {
-            "scan_ids": scan_ids,
-            "voxel_coords": voxel_coords,
-            "p2v_map": p2v_map,
-            "v2p_map": v2p_map,
-            "spatial_shape": spatial_shape,
-            "feats": feats,
-            "superpoints": superpoints,
-            "batch_offsets": batch_offsets,
-            "insts": insts,
+            'scan_ids': scan_ids,
+            'voxel_coords': voxel_coords,
+            'p2v_map': p2v_map,
+            'v2p_map': v2p_map,
+            'spatial_shape': spatial_shape,
+            'feats': feats,
+            'superpoints': superpoints,
+            'batch_offsets': batch_offsets,
+            'insts': insts,
         }

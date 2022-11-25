@@ -1,7 +1,6 @@
 import json
-import os
-
 import numpy as np
+import os
 from plyfile import PlyData
 
 
@@ -55,8 +54,7 @@ def export_instance_ids_for_eval(filename, label_ids, instance_ids):
         for idx, inst_id in enumerate(insts):
             if inst_id == 0:  # 0 -> no instance for this vertex
                 continue
-            output_mask_file = os.path.join(output_mask_path_relative,
-                                            name + '_' + str(idx) + '.txt')
+            output_mask_file = os.path.join(output_mask_path_relative, name + '_' + str(idx) + '.txt')
             loc = np.where(instance_ids == inst_id)
             label_id = label_ids[loc[0][0]]
             f.write('%s %d %f\n' % (output_mask_file, label_id, 1.0))
@@ -130,8 +128,8 @@ def read_instance_prediction_file(filename, pred_path):
         mask_file = os.path.abspath(mask_file)
         # check that mask_file lives inside prediction path
         if os.path.commonprefix([mask_file, abs_pred_path]) != abs_pred_path:
-            print(('predicted mask {} in prediction text file {}' +
-                   'points outside of prediction path.').format(mask_file, filename))
+            print(('predicted mask {} in prediction text file {}' + 'points outside of prediction path.').format(
+                mask_file, filename))
 
         info = {}
         info['label_id'] = int(float(parts[1]))

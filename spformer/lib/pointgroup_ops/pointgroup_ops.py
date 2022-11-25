@@ -9,7 +9,9 @@ from torch.autograd import Function
 # import pointgroup_ops_ext
 from . import pointgroup_ops_ext
 
+
 class Voxelization_Idx(Function):
+
     @staticmethod
     def forward(ctx, coords, batchsize, mode=4):
         '''
@@ -32,15 +34,16 @@ class Voxelization_Idx(Function):
         pointgroup_ops_ext.voxelize_idx(coords, output_coords, input_map, output_map, batchsize, mode)
         return output_coords, input_map, output_map
 
-
     @staticmethod
     def backward(ctx, a=None, b=None, c=None):
         return None
+
 
 voxelization_idx = Voxelization_Idx.apply
 
 
 class Voxelization(Function):
+
     @staticmethod
     def forward(ctx, feats, map_rule, mode=4):
         '''
@@ -62,7 +65,6 @@ class Voxelization(Function):
         pointgroup_ops_ext.voxelize_fp(feats, output_feats, map_rule, mode, M, maxActive, C)
         return output_feats
 
-
     @staticmethod
     def backward(ctx, d_output_feats):
         map_rule, mode, maxActive, N = ctx.for_backwards
@@ -73,10 +75,12 @@ class Voxelization(Function):
         pointgroup_ops_ext.voxelize_bp(d_output_feats.contiguous(), d_feats, map_rule, mode, M, maxActive, C)
         return d_feats, None, None
 
+
 voxelization = Voxelization.apply
 
 
 class PointRecover(Function):
+
     @staticmethod
     def forward(ctx, feats, map_rule, nPoint):
         '''
@@ -110,10 +114,12 @@ class PointRecover(Function):
 
         return d_feats, None, None
 
+
 point_recover = PointRecover.apply
 
 
 class BallQueryBatchP(Function):
+
     @staticmethod
     def forward(ctx, coords, batch_idxs, batch_offsets, radius, meanActive):
         '''
@@ -136,7 +142,8 @@ class BallQueryBatchP(Function):
         while True:
             idx = torch.cuda.IntTensor(n * meanActive).zero_()
             start_len = torch.cuda.IntTensor(n, 2).zero_()
-            nActive = pointgroup_ops_ext.ballquery_batch_p(coords, batch_idxs, batch_offsets, idx, start_len, n, meanActive, radius)
+            nActive = pointgroup_ops_ext.ballquery_batch_p(coords, batch_idxs, batch_offsets, idx, start_len, n,
+                                                           meanActive, radius)
             if nActive <= n * meanActive:
                 break
             meanActive = int(nActive // n + 1)
@@ -148,10 +155,12 @@ class BallQueryBatchP(Function):
     def backward(ctx, a=None, b=None):
         return None, None, None
 
+
 ballquery_batch_p = BallQueryBatchP.apply
 
 
 class BFSCluster(Function):
+
     @staticmethod
     def forward(ctx, semantic_label, ball_query_idxs, start_len, threshold):
         '''
@@ -172,7 +181,8 @@ class BFSCluster(Function):
         cluster_idxs = semantic_label.new()
         cluster_offsets = semantic_label.new()
 
-        pointgroup_ops_ext.bfs_cluster(semantic_label, ball_query_idxs, start_len, cluster_idxs, cluster_offsets, N, threshold)
+        pointgroup_ops_ext.bfs_cluster(semantic_label, ball_query_idxs, start_len, cluster_idxs, cluster_offsets, N,
+                                       threshold)
 
         return cluster_idxs, cluster_offsets
 
@@ -180,10 +190,12 @@ class BFSCluster(Function):
     def backward(ctx, a=None):
         return None
 
+
 bfs_cluster = BFSCluster.apply
 
 
 class RoiPool(Function):
+
     @staticmethod
     def forward(ctx, feats, proposals_offset):
         '''
@@ -215,14 +227,17 @@ class RoiPool(Function):
 
         d_feats = torch.cuda.FloatTensor(sumNPoint, C).zero_()
 
-        pointgroup_ops_ext.roipool_bp(d_feats, proposals_offset, output_maxidx, d_output_feats.contiguous(), nProposal, C)
+        pointgroup_ops_ext.roipool_bp(d_feats, proposals_offset, output_maxidx, d_output_feats.contiguous(), nProposal,
+                                      C)
 
         return d_feats, None
+
 
 roipool = RoiPool.apply
 
 
 class GetIoU(Function):
+
     @staticmethod
     def forward(ctx, proposals_idx, proposals_offset, instance_labels, instance_pointnum):
         '''
@@ -243,7 +258,8 @@ class GetIoU(Function):
 
         proposals_iou = torch.cuda.FloatTensor(nProposal, nInstance).zero_()
 
-        pointgroup_ops_ext.get_iou(proposals_idx, proposals_offset, instance_labels, instance_pointnum, proposals_iou, nInstance, nProposal)
+        pointgroup_ops_ext.get_iou(proposals_idx, proposals_offset, instance_labels, instance_pointnum, proposals_iou,
+                                   nInstance, nProposal)
 
         return proposals_iou
 
@@ -251,10 +267,12 @@ class GetIoU(Function):
     def backward(ctx, a=None):
         return None, None, None, None
 
+
 get_iou = GetIoU.apply
 
 
 class SecMean(Function):
+
     @staticmethod
     def forward(ctx, inp, offsets):
         '''
@@ -279,10 +297,12 @@ class SecMean(Function):
     def backward(ctx, a=None):
         return None, None
 
+
 sec_mean = SecMean.apply
 
 
 class SecMin(Function):
+
     @staticmethod
     def forward(ctx, inp, offsets):
         '''
@@ -307,10 +327,12 @@ class SecMin(Function):
     def backward(ctx, a=None):
         return None, None
 
+
 sec_min = SecMin.apply
 
 
 class SecMax(Function):
+
     @staticmethod
     def forward(ctx, inp, offsets):
         '''
@@ -334,5 +356,6 @@ class SecMax(Function):
     @staticmethod
     def backward(ctx, a=None):
         return None, None
+
 
 sec_max = SecMax.apply

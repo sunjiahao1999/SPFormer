@@ -1,19 +1,13 @@
 import functools
-import math
-from typing import Dict
-
 import gorilla
 import pointgroup_ops
 import spconv.pytorch as spconv
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from numpy import indices
-from spconv.pytorch import SparseConvTensor
-from spconv.pytorch.modules import SparseModule
 from torch_scatter import scatter_max, scatter_mean
-from spformer.utils import rle_encode, cuda_cast
 
+from spformer.utils import cuda_cast, rle_encode
 from .backbone import ResidualBlock, UBlock
 from .loss import Criterion
 from .query_decoder import QueryDecoder
@@ -30,7 +24,7 @@ class SPFormer(nn.Module):
         media: int = 32,
         normalize_before=True,
         return_blocks=True,
-        pool="mean",
+        pool='mean',
         num_class=18,
         decoder=None,
         criterion=None,
@@ -48,7 +42,7 @@ class SPFormer(nn.Module):
                 kernel_size=3,
                 padding=1,
                 bias=False,
-                indice_key="subm1",
+                indice_key='subm1',
             ))
         block = ResidualBlock
         norm_fn = functools.partial(nn.BatchNorm1d, eps=1e-4, momentum=0.1)
@@ -88,10 +82,10 @@ class SPFormer(nn.Module):
                 if isinstance(m, nn.BatchNorm1d):
                     m.eval()
 
-    def forward(self, batch, mode="loss"):
-        if mode == "loss":
+    def forward(self, batch, mode='loss'):
+        if mode == 'loss':
             return self.loss(**batch)
-        elif mode == "predict":
+        elif mode == 'predict':
             return self.predict(**batch)
 
     @cuda_cast
@@ -107,7 +101,8 @@ class SPFormer(nn.Module):
         return loss, loss_dict
 
     @cuda_cast
-    def predict(self, scan_ids, voxel_coords, p2v_map, v2p_map, spatial_shape, feats, insts, superpoints, batch_offsets):
+    def predict(self, scan_ids, voxel_coords, p2v_map, v2p_map, spatial_shape, feats, insts, superpoints,
+                batch_offsets):
         batch_size = len(batch_offsets) - 1
         voxel_feats = pointgroup_ops.voxelization(feats, v2p_map)
         input = spconv.SparseConvTensor(voxel_feats, voxel_coords.int(), spatial_shape, batch_size)
@@ -125,7 +120,8 @@ class SPFormer(nn.Module):
 
         scores = F.softmax(pred_labels[0], dim=-1)[:, :-1]
         scores *= pred_scores[0]
-        labels = torch.arange(self.num_class, device=scores.device).unsqueeze(0).repeat(self.decoder.num_query, 1).flatten(0, 1)
+        labels = torch.arange(
+            self.num_class, device=scores.device).unsqueeze(0).repeat(self.decoder.num_query, 1).flatten(0, 1)
         scores, topk_idx = scores.flatten(0, 1).topk(self.test_cfg.topk_insts, sorted=False)
         labels = labels[topk_idx]
         labels += 1
@@ -179,8 +175,8 @@ class SPFormer(nn.Module):
         x = x.features[v2p_map.long()]  # (B*N, media)
 
         # superpoint pooling
-        if self.pool == "mean":
+        if self.pool == 'mean':
             x = scatter_mean(x, superpoints, dim=0)  # (B*M, media)
-        elif self.pool == "max":
+        elif self.pool == 'max':
             x, _ = scatter_max(x, superpoints, dim=0)  # (B*M, media)
         return x
