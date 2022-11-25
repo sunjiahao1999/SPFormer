@@ -1,8 +1,8 @@
 train:
   seed: 1999
   epochs: 512
-  interval: 16 # save & eval interval
-  pretrain: checkpoints/epoch_00512.pth
+  interval: 16
+  pretrain: checkpoints/sstnet_pretrain.pth
 
 test:
   seed: 1999
