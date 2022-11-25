@@ -185,15 +185,15 @@ class ScanNetDataset(Dataset):
             assert len(torch.unique(semantic_label[idx])) == 1
             sem_id = semantic_label[idx][0]
             if semantic_label[idx][0] == -100:
-                sem_id = 1
-                gt_inst[idx] = sem_id * 1000 + i + 1
+                # sem_id = 1
+                # gt_inst[idx] = sem_id * 1000 + i + 1
                 continue
             gt_mask = torch.zeros(num_points)
             gt_mask[idx] = 1
             gt_masks.append(gt_mask)
             gt_label = sem_id
             gt_labels.append(gt_label)
-            gt_inst[idx] = self.NYU_ID[sem_id] * 1000 + i + 1
+            gt_inst[idx] = (sem_id + 1) * 1000 + i + 1
         if gt_masks:
             gt_masks = torch.stack(gt_masks, dim=0)
             gt_spmasks = torch_scatter.scatter_mean(gt_masks.float(), superpoint, dim=-1)

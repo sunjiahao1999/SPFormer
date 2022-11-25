@@ -17,7 +17,7 @@ from spformer.utils import rle_encode, cuda_cast
 from .backbone import ResidualBlock, UBlock
 from .loss import Criterion
 from .query_decoder import QueryDecoder
-scannet_semantic_label_idx = torch.tensor([3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 24, 28, 33, 34, 36, 39]).cuda()
+
 
 @gorilla.MODELS.register_module()
 class SPFormer(nn.Module):
@@ -93,10 +93,9 @@ class SPFormer(nn.Module):
             return self.loss(**batch)
         elif mode == "predict":
             return self.predict(**batch)
-    
+
     @cuda_cast
-    def loss(self, scan_ids, voxel_coords, p2v_map, v2p_map, spatial_shape, feats, insts, superpoints,
-             batch_offsets):
+    def loss(self, scan_ids, voxel_coords, p2v_map, v2p_map, spatial_shape, feats, insts, superpoints, batch_offsets):
         batch_size = len(batch_offsets) - 1
         voxel_feats = pointgroup_ops.voxelization(feats, v2p_map)
         input = spconv.SparseConvTensor(voxel_feats, voxel_coords.int(), spatial_shape, batch_size)
@@ -108,8 +107,7 @@ class SPFormer(nn.Module):
         return loss, loss_dict
 
     @cuda_cast
-    def predict(self, scan_ids, voxel_coords, p2v_map, v2p_map, spatial_shape, feats, insts, superpoints,
-                batch_offsets):
+    def predict(self, scan_ids, voxel_coords, p2v_map, v2p_map, spatial_shape, feats, insts, superpoints, batch_offsets):
         batch_size = len(batch_offsets) - 1
         voxel_feats = pointgroup_ops.voxelization(feats, v2p_map)
         input = spconv.SparseConvTensor(voxel_feats, voxel_coords.int(), spatial_shape, batch_size)
@@ -130,7 +128,7 @@ class SPFormer(nn.Module):
         labels = torch.arange(self.num_class, device=scores.device).unsqueeze(0).repeat(self.decoder.num_query, 1).flatten(0, 1)
         scores, topk_idx = scores.flatten(0, 1).topk(self.test_cfg.topk_insts, sorted=False)
         labels = labels[topk_idx]
-        labels = scannet_semantic_label_idx[labels]
+        labels += 1
 
         topk_idx = torch.div(topk_idx, self.num_class, rounding_mode='floor')
         mask_pred = pred_masks[0]
@@ -172,8 +170,6 @@ class SPFormer(nn.Module):
 
         gt_instances = insts[0].gt_instances
         return dict(scan_id=scan_ids[0], pred_instances=pred_instances, gt_instances=gt_instances)
-
-
 
     def extract_feat(self, x, superpoints, v2p_map):
         # backbone

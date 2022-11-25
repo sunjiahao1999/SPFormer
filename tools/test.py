@@ -52,7 +52,7 @@ def main():
 
     if not cfg.data.test.prefix == "test":
         logger.info('Evaluate instance segmentation')
-        scannet_eval = ScanNetEval(dataset.CLASSES, dataset.NYU_ID)
+        scannet_eval = ScanNetEval(dataset.CLASSES)
         scannet_eval.evaluate(pred_insts, gt_insts)
 
     # save output
@@ -60,7 +60,7 @@ def main():
         logger.info('Save results')
         nyu_id = dataset.NYU_ID
         save_pred_instances(args.out, 'pred_instance', scan_ids, pred_insts, nyu_id)
-        if not cfg.data.prefix == "test":
+        if not cfg.data.test.prefix == "test":
             save_gt_instances(args.out, 'gt_instance', scan_ids, gt_insts, nyu_id)
 
 
