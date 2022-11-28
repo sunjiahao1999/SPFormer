@@ -6,7 +6,7 @@ NEWS:🔥SPFormer is accepted at AAAI2023!🔥
 
 Jiahao Sun,Chunmei Qing, Junpeng Tan, Xiangmin Xu
 
-<img src="docs\SuperpointFormer.png" />
+<img src="docs\SPFormer.png" />
 
 ## Introduction
 
