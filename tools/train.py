@@ -71,7 +71,8 @@ def train(epoch, model, dataloader, optimizer, lr_scheduler, cfg, logger, writer
     for k, v in meter_dict.items():
         writer.add_scalar(f'train/{k}', v.avg, epoch)
     save_file = osp.join(cfg.work_dir, 'lastest.pth')
-    gorilla.save_checkpoint(model, save_file, optimizer, lr_scheduler)
+    meta = dict(epoch=epoch)
+    gorilla.save_checkpoint(model, save_file, optimizer, lr_scheduler, meta)
 
 
 @torch.no_grad()
@@ -135,7 +136,8 @@ def main():
     start_epoch = 1
     if args.resume:
         logger.info(f'Resume from {args.resume}')
-        start_epoch = gorilla.resume(args.resume, logger, model, optimizer, lr_scheduler)
+        meta = gorilla.resume(args.resume, logger, model, optimizer, lr_scheduler)
+        start_epoch = meta['epoch']
     elif cfg.train.pretrain:
         logger.info(f'Load pretrain from {cfg.train.pretrain}')
         gorilla.load_checkpoint(model, cfg.train.pretrain, strict=False)
