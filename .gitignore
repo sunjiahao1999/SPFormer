@@ -15,3 +15,4 @@ data/scannetv2/val_gt
 data/scannetv2/test
 
 exps
+results

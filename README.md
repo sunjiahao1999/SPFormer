@@ -6,13 +6,13 @@ NEWS:🔥SPFormer is accepted at AAAI2023!🔥
 
 Jiahao Sun,Chunmei Qing, Junpeng Tan, Xiangmin Xu
 
-![](C:\Users\57843\Projects\SPFormer\docs\SuperpointFormer.png)
+![](docs\SuperpointFormer.png)
 
 ## Introduction
 
 ​	Most existing methods realize 3D instance segmentation by extending those models used for 3D object detection or 3D semantic segmentation. However, these non-straightforward methods suffer from two drawbacks: 1) Imprecise bounding boxes or unsatisfactory semantic predictions limit the performance of the overall 3D instance segmentation framework. 2) Existing method requires a time-consuming intermediate step of aggregation. To address these issues, this paper proposes a novel end-to-end 3D instance segmentation method based on Superpoint Transformer, named as SPFormer. It groups potential features from point clouds into superpoints, and directly predicts instances through query vectors without relying on the results of object detection or semantic segmentation. The key step in this framework is a novel query decoder with transformers that can capture the instance information through the superpoint cross-attention mechanism and generate the superpoint masks of the instances. Through bipartite matching based on superpoint masks, SPFormer can implement the network training without the intermediate aggregation step, which accelerates the network. Extensive experiments on ScanNetv2 and S3DIS benchmarks verify that our method is concise yet efficient. Notably, SPFormer exceeds compared state-of-the-art methods by 4.3% on ScanNetv2 hidden test set in terms of mAP and keeps fast inference speed (247ms per frame) simultaneously.
 
-<img src="C:\Users\57843\Projects\SPFormer\docs\snapshot.png" alt="snapshot" style="zoom:50%;" />
+<img src="docs\snapshot.png" alt="snapshot" style="zoom:50%;" />
 
 The snapshot from ScanNetv2 benchmark testing server on 11/07/2022. SPFormer ranks top on the AP50 leadboard.
 
