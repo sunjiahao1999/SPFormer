@@ -26,46 +26,39 @@ Requirements
 
 The following installation suppose `python=3.8` `pytorch=1.10` and `cuda=11.4`.
 
-Create a conda virtual environment
+- Create a conda virtual environment
 
-```
-conda create -n spformer python=3.8
-conda activate spformer
-```
+  ```
+  conda create -n spformer python=3.8
+  conda activate spformer
+  ```
 
-Clone the repository
+- Clone the repository
 
-```
-git clone https://github.com/sunjiahao1999/SPFormer.git
-```
+  ```
+  git clone https://github.com/sunjiahao1999/SPFormer.git
+  ```
 
-Install the dependencies
+- Install the dependencies
 
-​	Install [Pytorch 1.10](https://pytorch.org/)
+  Install [Pytorch 1.10](https://pytorch.org/)
 
-```
-pip install spconv-cu114
-conda install pytorch-scatter -c pyg
-pip install -r requirements.txt
-```
+  ```
+  pip install spconv-cu114
+  conda install pytorch-scatter -c pyg
+  pip install -r requirements.txt
+  ```
 
-​	Install segmentator from this [repo](https://github.com/Karbo123/segmentator) (We wrap the segmentator in ScanNet).
+  Install segmentator from this [repo](https://github.com/Karbo123/segmentator) (We wrap the segmentator in ScanNet).
 
-Install build requirement
+- Setup, Install spformer and pointgroup_ops.
 
-```
-sudo apt-get install libsparsehash-dev
-```
-
-Setup
-
-Install spformer and pointgroup_ops.
-
-```
-python setup.py develop
-cd spformer/lib/
-python setup.py develop
-```
+  ```
+  sudo apt-get install libsparsehash-dev
+  python setup.py develop
+  cd spformer/lib/
+  python setup.py develop
+  ```
 
 ## Data Preparation
 
