@@ -2,9 +2,11 @@
 
 NEWS:🔥SPFormer is accepted at AAAI2023!🔥
 
-[Superpoint Transformer for 3D Scene Instance Segmentation]()
+[Superpoint Transformer for 3D Scene Instance Segmentation](https://arxiv.org/abs/2211.15766)
 
 Jiahao Sun,Chunmei Qing, Junpeng Tan, Xiangmin Xu
+
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/superpoint-transformer-for-3d-scene-instance/3d-instance-segmentation-on-scannetv2)](https://paperswithcode.com/sota/3d-instance-segmentation-on-scannetv2?p=superpoint-transformer-for-3d-scene-instance)[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/superpoint-transformer-for-3d-scene-instance/3d-instance-segmentation-on-s3dis)](https://paperswithcode.com/sota/3d-instance-segmentation-on-s3dis?p=superpoint-transformer-for-3d-scene-instance)
 
 <img src="docs\SPFormer.png" />
 
@@ -141,6 +143,15 @@ You can visualize by Open3D or visualize saved `.ply` files on MeshLab. Argument
 ## Citation
 
 If you find this work useful in your research, please cite:
+
+```
+@misc{2211.15766,
+Author = {Jiahao Sun and Chunmei Qing and Junpeng Tan and Xiangmin Xu},
+Title = {Superpoint Transformer for 3D Scene Instance Segmentation},
+Year = {2022},
+Eprint = {arXiv:2211.15766},
+}
+```
 
 ## Ancknowledgement
 
