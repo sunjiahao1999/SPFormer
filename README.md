@@ -4,9 +4,9 @@ NEWS:🔥SPFormer is accepted at AAAI2023!🔥
 
 [Superpoint Transformer for 3D Scene Instance Segmentation](https://arxiv.org/abs/2211.15766)
 
-Jiahao Sun,Chunmei Qing, Junpeng Tan, Xiangmin Xu
+Jiahao Sun, Chunmei Qing, Junpeng Tan, Xiangmin Xu
 
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/superpoint-transformer-for-3d-scene-instance/3d-instance-segmentation-on-scannetv2)](https://paperswithcode.com/sota/3d-instance-segmentation-on-scannetv2?p=superpoint-transformer-for-3d-scene-instance)[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/superpoint-transformer-for-3d-scene-instance/3d-instance-segmentation-on-s3dis)](https://paperswithcode.com/sota/3d-instance-segmentation-on-s3dis?p=superpoint-transformer-for-3d-scene-instance)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/superpoint-transformer-for-3d-scene-instance/3d-instance-segmentation-on-scannetv2)](https://paperswithcode.com/sota/3d-instance-segmentation-on-scannetv2?p=superpoint-transformer-for-3d-scene-instance)  [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/superpoint-transformer-for-3d-scene-instance/3d-instance-segmentation-on-s3dis)](https://paperswithcode.com/sota/3d-instance-segmentation-on-s3dis?p=superpoint-transformer-for-3d-scene-instance)
 
 <img src="docs\SPFormer.png" />
 
