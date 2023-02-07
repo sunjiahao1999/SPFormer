@@ -54,10 +54,10 @@ class ScanNetDataset(Dataset):
         if self.with_label:
             return torch.load(filename)
         else:
-            xyz, rgb = torch.load(filename)
+            xyz, rgb, superpoint = torch.load(filename)
             dummy_sem_label = np.zeros(xyz.shape[0], dtype=np.float32)
             dummy_inst_label = np.zeros(xyz.shape[0], dtype=np.float32)
-            return xyz, rgb, dummy_sem_label, dummy_inst_label
+            return xyz, rgb, superpoint, dummy_sem_label, dummy_inst_label
 
     def __len__(self):
         return len(self.filenames)
